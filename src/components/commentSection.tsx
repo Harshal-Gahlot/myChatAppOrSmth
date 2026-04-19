@@ -12,9 +12,10 @@ interface Comment {
 interface Props {
 	post_id: string;
 	allow_comments: boolean;
+	post_owner_id: string;
 }
 
-export default function CommentSection({ post_id, allow_comments }: Props) {
+export default function CommentSection({ post_id, allow_comments, post_owner_id }: Props) {
 	const [comments, setComments] = useState<Comment[]>([]);
 	const [newComment, setNewComment] = useState("");
 	const [user_id, setUserId] = useState<string | null>(null);
@@ -30,11 +31,15 @@ export default function CommentSection({ post_id, allow_comments }: Props) {
 		if (!isOpen) {
 			setIsOpen(true);
 
-			const { data } = await supabase
+			const { data, error } = await supabase
 				.from("comments")
-				.select("*, profile(username)")
+				.select("*, profiles(username)")
 				.eq("post_id", post_id)
-				.order("created_at", { ascending: true });
+				.order("created_at", { ascending: true })
+
+			if (error) {
+				console.error("error fetching comments:", error.message)
+			}
 
 			if (data) setComments(data as any);
 		} else {
@@ -64,6 +69,21 @@ export default function CommentSection({ post_id, allow_comments }: Props) {
 		}
 	};
 
+	const deleteComment = async (commentId:string) => {
+		if (!window.confirm("delete this comment for real?")) return;
+
+		const {error} = await supabase
+			.from("comments")
+			.delete()
+			.eq("id", commentId)
+
+		if (error) {
+			alert("error deleting comment: " + error.message)
+		} else {
+			setComments((prevComments) => prevComments.filter((c) => c.id !== commentId))
+		}
+	}
+
 	return (
 		<div className="mt-4">
 			<button
@@ -85,12 +105,23 @@ export default function CommentSection({ post_id, allow_comments }: Props) {
 
 						{comments.map((comment) => (
 							<div key={comment.id} className="text-sm">
+								<div>
 								<span className="font-bold text-gray-700">
 									@{comment.profiles?.username}:{" "}
 								</span>
 								<span className="text-gray-600">
 									{comment.content}
 								</span>
+								</div>
+								
+								{(user_id === comment.user_id || user_id === post_owner_id) && (
+									<button
+										onClick={() => deleteComment(comment.id)}
+										className="text-xs text-red-400 hover:text-red-600 font-medium px-2 py-1 rounded hover:bg-red-50 transition-colors"
+									>
+										Delete
+									</button>
+								)}
 							</div>
 						))}
 					</div>

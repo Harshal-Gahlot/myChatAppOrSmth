@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import supabase from "../supabaseCreatedClient";
-import { ReactionButton } from "../pages/utils";
+import { ReactionButton } from "../utils/utils";
 
 interface Props {
 	postId: string;
