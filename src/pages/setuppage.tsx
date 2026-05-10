@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import supabase from "../supabaseCreatedClient";
+import { CardDemo } from "@/components/formCard";
 
 export default function SetupPage() {
 	const [username, setUsername] = useState("");
@@ -25,6 +26,7 @@ export default function SetupPage() {
 
 	return (
 		<div className="bg-yellow-950 w-screen h-screen grid place-items-center text-white placeholder:text-white">	
+		<CardDemo/>
 			{/* <form className="flex flex-col items-center" onSubmit={(e) => handleSubmit(e)}>
 				<h1>Create profile</h1>
 				<input

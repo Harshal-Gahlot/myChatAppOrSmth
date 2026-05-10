@@ -4,10 +4,13 @@ import supabase from "../supabaseCreatedClient";
 import PostReaction from "../components/postReaction";
 import CommentSection from "../components/commentSection";
 import { Post } from "../utils/globalTypes";
+import img1 from "@/assets/bridge.jpg"
+import img2 from "@/assets/sky_birds.jpg"
+import avatar from "@/assets/avatar.jpg"
 
 export default function PublicPage() {
 	const { username, category } = useParams();
-	// 'null' means "req sent, checking if user exist". 'false' means "username doesn't exist". 'true' means "user exist"
+	// below, 'null' means "req sent, checking if user exist". 'false' means "username doesn't exist". 'true' means "user exist"
 	const [exists, setExists] = useState<boolean | null>(null);
 	const [posts, setPosts] = useState<Post[]>([]);
 	const [showOldBeliefs, setShowOldBeliefs] = useState(false);
@@ -55,8 +58,10 @@ export default function PublicPage() {
 	if (exists === false) return <h1> username doesn't exist yet </h1>;
 
 	return (
-		<div className="max-w-2xl mx-auto p-6">
+		<div className="max-w-2xl mx-auto p-6 pt-0">
 			<header className="mb-12 text-center">
+				<img src={img2}></img>
+				<img src={avatar} className="w-44 rounded-full absolute p-4 -translate-y-20" />
 				<h1 className="text-4xl font-black text-gray-900 mb-2">@{username}</h1>
 				<p className="text-gray-500">Digital Garden</p>
 			</header>
