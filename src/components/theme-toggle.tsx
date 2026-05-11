@@ -1,5 +1,6 @@
 // import { Moon, Sun } from "@hugeicons/core-free-icons"
 import { HugeiconsIcon } from "@hugeicons/react"
+import { Moon, Sun } from "@hugeicons/core-free-icons";
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -8,7 +9,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
     import { useTheme } from "@/components/themeProvider"
-import { Moon, Sun } from "@hugeicons/core-free-icons";
 
 export function ModeToggle() {
   const { setTheme } = useTheme()

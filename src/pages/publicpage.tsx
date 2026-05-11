@@ -4,9 +4,10 @@ import supabase from "../supabaseCreatedClient";
 import PostReaction from "../components/postReaction";
 import CommentSection from "../components/commentSection";
 import { Post } from "../utils/globalTypes";
-import img1 from "@/assets/bridge.jpg"
-import img2 from "@/assets/sky_birds.jpg"
-import avatar from "@/assets/avatar.jpg"
+import img1 from "@/assets/bridge.jpg";
+import img2 from "@/assets/sky_birds.jpg";
+import banner from "@/assets/banner.png";
+import avatar from "@/assets/avatar.jpg";
 
 export default function PublicPage() {
 	const { username, category } = useParams();
@@ -60,7 +61,7 @@ export default function PublicPage() {
 	return (
 		<div className="max-w-2xl mx-auto p-6 pt-0">
 			<header className="mb-12 text-center">
-				<img src={img2}></img>
+				<img src={banner} className="w-full mix-blend-multiply"></img>
 				<img src={avatar} className="w-44 rounded-full absolute p-4 -translate-y-20" />
 				<h1 className="text-4xl font-black text-gray-900 mb-2">@{username}</h1>
 				<p className="text-gray-500">Digital Garden</p>
@@ -74,10 +75,17 @@ export default function PublicPage() {
 				{posts.map((post) => (
 					<div
 						key={post.id}
-						className="bg-white border border-gray-200 p-6 rounded-xl shadow-sm hover:shadow-md transition-show"
+						className="relative p-6 mb-8 border border-ink-light/40 bg-parchment-light rounded-sm" // shadow-sm hover:shadow-md transition-show"
 					>
-						<div className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">
-							{post.type.replace("_", " ")}
+						<div className="flex items-center mb-4 pb-2">
+							{/* justify-between items-baseline border-b border-ink-light/20" */}
+							<div className="text-xs font-bold text-gray-400 uppercase tracking-widest">
+								{post.type.replace("_", " ")}
+							</div>
+							<div className="px-2">·</div>
+							<div className="text-xs text-gray-400">
+								{new Date(post.created_at).toLocaleDateString()}
+							</div>
 						</div>
 						{/* conditionally rendering belief reason */}
 						{post.type === "belief" && post.metadata?.evo_history?.length > 0 && (
@@ -85,7 +93,9 @@ export default function PublicPage() {
 								{post.type === "belief" &&
 									post.metadata?.evo_history?.length > 1 && (
 										<button
-											className="bg-blue-500 text-xs px-2.5 py-1 rounded-full text-white my-2 hover:cursor-pointer hover:bg-blue-600"
+											className="px-4 py-2 text-sm rounded-sm tracking-wide font-bold text-ink bg-parchment-dark mb-4 
+											border-3 border-parchment-outline shadow-ink inset-shadow-sm/50 hover:cursor-pointer
+											hover:bg-parchment-darker" // hover:inset-shadow-sm/0 hover:shadow-sm"
 											onClick={() => setShowOldBeliefs(!showOldBeliefs)}
 										>
 											{showOldBeliefs ? (
@@ -112,7 +122,7 @@ export default function PublicPage() {
 														{" " + history_item.reason}
 													</p>
 												</div>
-											),
+											)
 										)}
 									</div>
 								) : (
@@ -136,7 +146,7 @@ export default function PublicPage() {
 							</div>
 						)}
 						{/* Main text */}
-						<p className="text-lg text-gray-800 whitespace-pre-wrap leading-relaxed">
+						<p className="text-lg whitespace-pre-wrap leading-relaxed text-ink">
 							{post.content}{" "}
 						</p>
 						{/* conditionally rendering quote source  */}
@@ -153,9 +163,6 @@ export default function PublicPage() {
 								allow_comments={post.allow_comments}
 								post_owner_id={post.user_id}
 							/>
-						</div>
-						<div className="mt-4 text-xs text-gray-400">
-							{new Date(post.created_at).toLocaleDateString()}
 						</div>
 					</div>
 				))}

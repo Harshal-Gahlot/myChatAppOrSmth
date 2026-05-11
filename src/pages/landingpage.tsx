@@ -56,7 +56,7 @@ export default function LandingPage() {
 						from your life stories to your beliefs, all in one place
 					</p>
 					<button
-						className="bg-white rounded-full px-10 p-2 cursor-pointer flex gap-2 aline-center w-fit"
+						className="bg-white text-yellow-950 rounded-full px-10 p-2 cursor-pointer flex gap-2 aline-center w-fit"
 						onClick={handleLogin}
 					>
 						<img src={google_icon} className="w-4" alt="G" />
