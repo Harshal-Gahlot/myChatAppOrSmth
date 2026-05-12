@@ -53,11 +53,7 @@ export default function PostReaction({ postId, postType }: Props) {
 				[type]: Math.max(0, (prev[type] || 0) - 1),
 			}));
 
-			await supabase
-				.from("reactions")
-				.delete()
-				.eq("post_id", postId)
-				.eq("user_id", userId);
+			await supabase.from("reactions").delete().eq("post_id", postId).eq("user_id", userId);
 		} else {
 			setMyReaction(type);
 			setCounts((prev) => ({
@@ -65,8 +61,7 @@ export default function PostReaction({ postId, postType }: Props) {
 				[type]: (prev[type] || 0) + 1,
 				...(previousReaction
 					? {
-							[previousReaction]:
-								Math.max(0, prev[previousReaction] || 0) - 1,
+							[previousReaction]: Math.max(0, prev[previousReaction] || 0) - 1,
 						}
 					: {}),
 			}));
@@ -95,7 +90,12 @@ export default function PostReaction({ postId, postType }: Props) {
 				<ReactionButton
 					type="plus_one"
 					label="+1"
-					activeColor="bg-green-100 text-green-700"
+					setColor={{
+						normal: "text-green-700",
+						preOnPress: "bg-green-100 hover:bg-green-200",
+						postOnPress: "bg-green-200 hover:bg-green-100",
+						fill: "",
+					}}
 					myReaction={myReaction}
 					counts={counts}
 					onReact={handleReact}
@@ -104,12 +104,16 @@ export default function PostReaction({ postId, postType }: Props) {
 				<ReactionButton
 					type="trash"
 					label="🗑️ Trash"
-					activeColor="bg-red-100 text-red-700"
+					setColor={{
+						normal: "text-red-700",
+						preOnPress: "bg-red-100 hover:bg-red-200", // hover:text-ink and put normal into postOnPress
+						postOnPress: "bg-red-200 hover:bg-red-100",
+						fill: "",
+					}}
 					myReaction={myReaction}
 					counts={counts}
 					onReact={handleReact}
 				/>
-
 			</div>
 		);
 	}
@@ -117,12 +121,17 @@ export default function PostReaction({ postId, postType }: Props) {
 	return (
 		<div className="mt-3">
 			<ReactionButton
-					type="like"
-					label={myReaction === 'like' ? '❤️' : '🤍'}
-					activeColor="bg-pink-100 text-pink-700"
-					myReaction={myReaction}
-					counts={counts}
-					onReact={handleReact}
+				type="like"
+				hugeIcon="heart"
+				myReaction={myReaction}
+				counts={counts}
+				onReact={handleReact}
+				setColor={{
+					normal: "text-pink-800 hover:bg-pink-100",
+					preOnPress: "",
+					postOnPress: "",
+					fill: "fill-pink-800",
+				}}
 			/>
 		</div>
 	);
