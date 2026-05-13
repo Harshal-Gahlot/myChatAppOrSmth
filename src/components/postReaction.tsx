@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import supabase from "../supabaseCreatedClient";
-import { ReactionButton } from "../utils/utils";
+import { ReactionButton } from "../utils/postReactionBtn";
 
 interface Props {
 	postId: string;
@@ -40,7 +40,7 @@ export default function PostReaction({ postId, postType }: Props) {
 		fetchData();
 	}, [postId]);
 
-	const handleReact = async (type: string) => {
+	async function handleReact(type: string): Promise<void> {
 		if (!userId) return alert("please login to react");
 
 		const previousReaction = myReaction;
@@ -98,7 +98,7 @@ export default function PostReaction({ postId, postType }: Props) {
 					}}
 					myReaction={myReaction}
 					counts={counts}
-					onReact={handleReact}
+					onClicked={() => handleReact("plus_one")}
 				/>
 
 				<ReactionButton
@@ -112,7 +112,7 @@ export default function PostReaction({ postId, postType }: Props) {
 					}}
 					myReaction={myReaction}
 					counts={counts}
-					onReact={handleReact}
+					onClicked={() => handleReact("trash")}
 				/>
 			</div>
 		);
@@ -125,7 +125,7 @@ export default function PostReaction({ postId, postType }: Props) {
 				hugeIcon="heart"
 				myReaction={myReaction}
 				counts={counts}
-				onReact={handleReact}
+				onClicked={() => handleReact("like")}
 				setColor={{
 					normal: "text-pink-800 hover:bg-pink-100",
 					preOnPress: "",
