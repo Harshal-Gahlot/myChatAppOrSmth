@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import supabase from "../supabaseCreatedClient";
 import PostReaction from "../components/postReaction";
 import CommentSection from "../components/commentSection";
@@ -8,9 +8,11 @@ import img1 from "@/assets/bridge.jpg";
 import img2 from "@/assets/sky_birds.jpg";
 import banner from "@/assets/banner.png";
 import avatar from "@/assets/avatar.jpg";
+import { ReactionButton } from "@/utils/postReactionBtn";
 
 export default function PublicPage() {
 	const { username, category } = useParams();
+	const navigate = useNavigate();
 	// below, 'null' means "req sent, checking if user exist". 'false' means "username doesn't exist". 'true' means "user exist"
 	const [exists, setExists] = useState<boolean | null>(null);
 	const [posts, setPosts] = useState<Post[]>([]);
@@ -155,14 +157,30 @@ export default function PublicPage() {
 								- {post.metadata.source}
 							</div>
 						)}
-						{/* Reaction Bar */}
-						<div className="border-t border-gray-100 mt-4 pt-2">
+						{/* Reaction and Comments Bar */}
+						<div className="flex flex-col gap-0 border-t border-gray-100 mt-4 pt-2">
 							<PostReaction postId={post.id} postType={post.type} />
-							<CommentSection
+
+							<div className="mt-4">
+								{ReactionButton({
+									type: "string",
+									onClicked: () => navigate(`/${post.profiles.username}/scroll/${post.id}`), 
+									myReaction: null,
+									counts: { comment: 3 },
+									hugeIcon: "comment",
+									setColor: {
+										normal: "text-sm text-gray-500 hover:text-blue-600 font-medium",
+										preOnPress: "",
+										postOnPress: "",
+										fill: "",
+									},
+								})}
+							</div>
+							{/* <CommentSection
 								post_id={post.id}
 								allow_comments={post.allow_comments}
 								post_owner_id={post.user_id}
-							/>
+							/> */}
 						</div>
 					</div>
 				))}

@@ -1,15 +1,14 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import supabase from "../supabaseCreatedClient";
-import { PostType, Post } from "../utils/globalTypes";
-
-interface Profile {
-	username: string;
-}
+import { PostType, Post, Profile } from "../utils/globalTypes";
+import { useProfileStore } from "../utils/utils";
+import type { ProfileStore } from "../utils/utils";
 
 export default function Dashboard() {
-	const [profile, setProfile] = useState<Profile | null>(null);
 	const navigate = useNavigate();
+	const profile = useProfileStore((state: ProfileStore) => state.profile);
+	const setProfile = useProfileStore((state: ProfileStore) => state.setProfile);
 	const [postType, setPostType] = useState<PostType>("thought");
 	const [content, setContent] = useState("");
 	const [source, setSource] = useState("");
@@ -21,6 +20,7 @@ export default function Dashboard() {
 	const [evolvReason, setEvolvReason] = useState("");
 	const [editingPostId, setEditingPostId] = useState<string | null>(null);
 	const [editContent, setEditContent] = useState("");
+	console.log('profile', profile)
 
 	// Fetching user profile and their previous posts
 	useEffect(() => {
@@ -149,14 +149,12 @@ export default function Dashboard() {
 			<div className="flex justify-between items-center mb-8">
 				<h1 className="py-4 text-3xl">Studio ({profile.username})</h1>
 
-				<a
-					href={`/${profile.username}`}
-					target="_black"
-					rel="noreferrer"
+				<button
+					onClick={() => navigate(`/${profile.username}`)}
 					className="text-blue-600"
 				>
 					View Public Page →
-				</a>
+				</button>
 			</div>
 
 			{/* prettier-ignore */}

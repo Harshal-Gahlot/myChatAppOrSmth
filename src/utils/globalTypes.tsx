@@ -19,3 +19,7 @@ export interface Post {
 		source?: string;
 	 };
 }
+
+export interface Profile {
+	username: string;
+}
