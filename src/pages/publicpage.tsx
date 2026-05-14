@@ -24,7 +24,8 @@ export default function PublicPage() {
 			const { data: userData, error: userError } = await supabase
 				.from("profiles")
 				.select("id")
-				.eq("username", username)
+				.eq("username", username) 
+				// TODO: in future if we wanted to add feature to repost, we have to fix this since rn it only fetches posts by the username
 				.single();
 
 			if (userError || !userData) {
@@ -37,7 +38,7 @@ export default function PublicPage() {
 
 			let query = supabase
 				.from("posts")
-				.select("*")
+				.select("*, profiles!posts_user_id_profiles_fkey(username)")
 				.eq("user_id", userData.id)
 				.eq("is_public", true)
 				.order("created_at", { ascending: false });
@@ -46,8 +47,14 @@ export default function PublicPage() {
 				query = query.eq("type", category);
 			}
 
-			const { data: postsData } = await query;
+			const { data: postsData, error: postsError } = await query;
 
+			if (postsError) {
+				console.log('postsError', postsError)
+				setExists(false)
+				return;
+			}
+			console.log('postsData', postsData)			
 			if (postsData) {
 				setPosts(postsData as Post[]);
 			}
@@ -76,9 +83,12 @@ export default function PublicPage() {
 				)}
 				{posts.map((post) => (
 					<div
-						key={post.id}
-						className="relative p-6 mb-8 border border-ink-light/40 bg-parchment-light rounded-sm" // shadow-sm hover:shadow-md transition-show"
+					// TODO: when clicked, do open up the that scroll page but not when user is selecting/high lighting some text on the scroll.
+					// onClick={() => navigate(`/${post.profiles.username}/scroll/${post.id}`)}
+					key={post.id}
+					className="relative p-6 mb-8 border border-ink-light/40 bg-parchment-light rounded-sm" // shadow-sm hover:shadow-md transition-show"
 					>
+					{console.log("post.profile.username", post.profiles.username) ?? null}
 						<div className="flex items-center mb-4 pb-2">
 							{/* justify-between items-baseline border-b border-ink-light/20" */}
 							<div className="text-xs font-bold text-gray-400 uppercase tracking-widest">
@@ -124,7 +134,7 @@ export default function PublicPage() {
 														{" " + history_item.reason}
 													</p>
 												</div>
-											)
+											),
 										)}
 									</div>
 								) : (

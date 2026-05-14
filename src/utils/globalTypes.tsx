@@ -10,6 +10,10 @@ interface evo {
 export interface Post {
 	id: string;
 	user_id: string;
+	profiles: {
+		id: string;
+		username: string;
+	}
 	content: string;
 	type: PostType;
 	created_at: string;
