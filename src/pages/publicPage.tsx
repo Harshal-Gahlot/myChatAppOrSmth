@@ -1,71 +1,91 @@
-import { useEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import supabase from "../supabaseCreatedClient";
 import PostReaction from "../components/postReaction";
-import CommentSection from "../components/commentSection";
 import { Post } from "../utils/globalTypes";
-import img1 from "@/assets/bridge.jpg";
-import img2 from "@/assets/sky_birds.jpg";
+// import img1 from "@/assets/bridge.jpg";
+// import img2 from "@/assets/sky_birds.jpg";
 import banner from "@/assets/banner.png";
 import avatar from "@/assets/avatar.jpg";
 import { ReactionButton } from "@/utils/postReactionBtn";
+import { managePageStateRendring, PostsPageState, usePostStore } from "@/utils/utils";
 
 export default function PublicPage() {
 	const { username, category } = useParams();
+	const fromPath = "publicPage/" + username;
 	const navigate = useNavigate();
+	const [state, setState] = useState<PostsPageState>({ status: "loading" });
+
+	// these below 3 line variables are for instant loading of this page when returning to it + scroll the exact location from where left the page.
+	const { cachesPosts, setCachePosts, setPageScroll, scrollPositions } = usePostStore();
+	const {posts, hasLoadedBefore} = cachesPosts[fromPath] || { posts: [], hasLoadedBefore: false };
+	const savedY = scrollPositions[fromPath] || 0;
+
 	// below, 'null' means "req sent, checking if user exist". 'false' means "username doesn't exist". 'true' means "user exist"
-	const [exists, setExists] = useState<boolean | null>(null);
-	const [posts, setPosts] = useState<Post[]>([]);
 	const [showOldBeliefs, setShowOldBeliefs] = useState(false);
+	console.log('posts', posts)
+
 
 	useEffect(() => {
-		async function fetchPublicData() {
-			// finding the User ID from the username
-			const { data: userData, error: userError } = await supabase
-				.from("profiles")
-				.select("id")
-				.eq("username", username) 
-				// TODO: in future if we wanted to add feature to repost, we have to fix this since rn it only fetches posts by the username
-				.single();
+		if (!hasLoadedBefore) {
+			async function fetchPublicData() {
+				// finding the User ID from the username
+				const { data: userData, error: userError } = await supabase
+					.from("profiles")
+					.select("id")
+					.eq("username", username)
+					// TODO: in future if we wanted to add feature to repost, we have to fix this since rn it only fetches posts by the username
+					.single();
 
-			if (userError || !userData) {
-				if (userError) console.log(userError);
-				setExists(false);
-				return;
+				if (userError || !userData) {
+					if (userError) console.log("userError", userError);
+					setState({status: "error"});
+					return;
+				}
+
+				// fetching the above username's posts
+				let query = supabase
+					.from("posts")
+					.select("*, profiles!posts_user_id_profiles_fkey(username)")
+					.eq("user_id", userData.id)
+					.eq("is_public", true)
+					.order("created_at", { ascending: false });
+
+				if (category) {
+					query = query.eq("type", category);
+				}
+
+				const { data: postsData, error: postsError } = await query;
+
+				if (postsError) {
+					console.log("postsError", postsError);
+					setState({status: "error"});
+					return;
+				}
+				console.log("postsData", postsData);
+				if (postsData) {
+					console.log('postsData', postsData)
+					setCachePosts(fromPath, postsData);
+				}
+				setState({status: "loaded", posts: postsData as Post[]});
 			}
 
-			// fetching the above username's posts
-
-			let query = supabase
-				.from("posts")
-				.select("*, profiles!posts_user_id_profiles_fkey(username)")
-				.eq("user_id", userData.id)
-				.eq("is_public", true)
-				.order("created_at", { ascending: false });
-
-			if (category) {
-				query = query.eq("type", category);
-			}
-
-			const { data: postsData, error: postsError } = await query;
-
-			if (postsError) {
-				console.log('postsError', postsError)
-				setExists(false)
-				return;
-			}
-			console.log('postsData', postsData)			
-			if (postsData) {
-				setPosts(postsData as Post[]);
-			}
-			setExists(true);
+			fetchPublicData();
+		} else {
+			setState({status: "loaded", posts});
 		}
-
-		fetchPublicData();
 	}, [username, category]);
 
-	if (exists === null) return <h1> im Loading very fost fost! </h1>;
-	if (exists === false) return <h1> username doesn't exist yet </h1>;
+	useLayoutEffect(() => {
+		if (state.status === "loaded" && savedY > 0) {
+			window.scrollTo(0, savedY);
+		}
+	}, [state.status]);
+
+	if (state.status !== "loaded") {
+		if (state.status === "404") return managePageStateRendring(state.status, "username doesn't exist")
+		return managePageStateRendring(state.status)
+	}
 
 	return (
 		<div className="max-w-2xl mx-auto p-6 pt-0">
@@ -83,12 +103,11 @@ export default function PublicPage() {
 				)}
 				{posts.map((post) => (
 					<div
-					// TODO: when clicked, do open up the that scroll page but not when user is selecting/high lighting some text on the scroll.
-					// onClick={() => navigate(`/${post.profiles.username}/scroll/${post.id}`)}
-					key={post.id}
-					className="relative p-6 mb-8 border border-ink-light/40 bg-parchment-light rounded-sm" // shadow-sm hover:shadow-md transition-show"
+						// TODO: when clicked, do open up the that scroll page but not when user is selecting/high lighting some text on the scroll.
+						// onClick={() => navigate(`/${post.profiles.username}/scroll/${post.id}`)}
+						key={post.id}
+						className="relative p-6 mb-8 border border-ink-light/40 bg-parchment-light rounded-sm" // shadow-sm hover:shadow-md transition-show"
 					>
-					{console.log("post.profile.username", post.profiles.username) ?? null}
 						<div className="flex items-center mb-4 pb-2">
 							{/* justify-between items-baseline border-b border-ink-light/20" */}
 							<div className="text-xs font-bold text-gray-400 uppercase tracking-widest">
@@ -139,7 +158,6 @@ export default function PublicPage() {
 									</div>
 								) : (
 									<div className="space-y-3 mb-3 border-l-2 border-blue-200 pl-3 text-sm text-gray-500">
-										{console.log(post.metadata?.evo_history) ?? null}
 										<p className="line-through">
 											{
 												post.metadata!.evo_history[
@@ -174,7 +192,12 @@ export default function PublicPage() {
 							<div className="mt-4">
 								{ReactionButton({
 									type: "string",
-									onClicked: () => navigate(`/${post.profiles.username}/scroll/${post.id}`), 
+									onClicked: () => {
+										navigate(`/${post.profiles.username}/scroll/${post.id}`, {
+											state: { fromPath },
+										});
+										setPageScroll(fromPath, window.scrollY);
+									},
 									myReaction: null,
 									counts: { comment: 3 },
 									hugeIcon: "comment",
